@@ -8,13 +8,8 @@ builder.Services.AddCodeFirstGrpc();
 
 var app = builder.Build();
 
-app.UseRouting();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapGrpcService<FileService>();
-
-    endpoints.MapGet("/", () => "Hello from File Service!");
-});
+app.MapGrpcService<FileService>();
+app.MapGet("/", () => "Hello from File Service!");
 
 app.Run();
 
