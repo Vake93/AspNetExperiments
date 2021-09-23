@@ -28,17 +28,15 @@ class WebSocketHandler : IMiddleware
         var buffer = new ArraySegment<byte>(data);
         using var stream = new MemoryStream(data);
 
-        var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
-
-        while (!webSocket.CloseStatus.HasValue)
+        do
         {
+            var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
             var message = Message.Deserialize(stream);
             message.Data = $"Hello, the server time is {DateTime.UtcNow.Ticks} Ticks";
             message.Serialize(stream);
-            await webSocket.SendAsync(buffer, result.MessageType, result.EndOfMessage, CancellationToken.None);
+            await webSocket.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
 
-            result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
-        }
+        } while (!webSocket.CloseStatus.HasValue);
 
         await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, webSocket.CloseStatusDescription, CancellationToken.None);
     }
